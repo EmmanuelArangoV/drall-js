@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RestorApp - Login</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-<main class="container">
-    <div class="card">
-        <div class="brand">
+export function LoginView() {
+    const main = document.createElement('main');
+    main.classList.add('container');
+
+    // Header / Brand Section
+    const brand = document.createElement('div');
+    brand.classList.add('brand');
+    brand.innerHTML = `
             <div class="icon-circle">
                 <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M11 9H9V2H15V9H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -21,10 +14,11 @@
                 </svg>
             </div>
             <h1 class="title">RestorApp</h1>
-            <p class="subtitle">Login to your account</p>
-        </div>
+            <p class="subtitle">Login to your account</p>`
 
-        <form class="form">
+    // Form Section
+    const form = document.createElement('form');
+    form.innerHTML = `
             <div class="field">
                 <label for="email" class="label">Email Address</label>
                 <div class="input-wrapper">
@@ -51,13 +45,15 @@
 
             <p class="footer-text">
                 Don't have an account? <a href="register.html" class="link">Sign up</a>
-            </p>
-        </form>
-    </div>
+            </p>`;
 
-    <footer class="page-footer">
-        RestorApp Academic Simulation
-    </footer>
-</main>
-</body>
-</html>
+    // Footer
+    const footer = document.createElement('footer');
+    footer.classList.add('page-footer');
+    footer.innerHTML = "RestorApp Academic Simulation"
+
+
+    return main;
+}
+
+
