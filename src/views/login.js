@@ -1,9 +1,11 @@
+import AuthServices from "../services/authServices.js";
+
 export function LoginView() {
     const main = document.createElement('main');
     main.classList.add('container');
 
     // Header / Brand Section
-    const brand = document.createElement('div');
+    const brand = document.createElement('div'); // <div>
     brand.classList.add('brand');
     brand.innerHTML = `
             <div class="icon-circle">
@@ -14,10 +16,11 @@ export function LoginView() {
                 </svg>
             </div>
             <h1 class="title">RestorApp</h1>
-            <p class="subtitle">Login to your account</p>`
+            <p class="subtitle">Login to your account</p>`;
 
     // Form Section
     const form = document.createElement('form');
+    form.classList.add('form');
     form.innerHTML = `
             <div class="field">
                 <label for="email" class="label">Email Address</label>
@@ -40,6 +43,8 @@ export function LoginView() {
                     <input type="password" id="password" class="input" placeholder="••••••••">
                 </div>
             </div>
+            
+            <p id="login-error" class="form-error" style="display:none;color:red;"></p>
 
             <button type="submit" class="button primary">Sign In</button>
 
@@ -53,7 +58,51 @@ export function LoginView() {
     footer.innerHTML = "RestorApp Academic Simulation"
 
 
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.appendChild(brand);
+    card.appendChild(form);
+
+    main.appendChild(card);
+    main.appendChild(footer);
+
+    loginRequest(main);
+
     return main;
 }
+
+function loginRequest(main) {
+    const formEvent = main.querySelector('.form');
+    const errorMsg = main.querySelector('#login-error'); // Mensaje de error
+
+    formEvent.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Esto hace que no se recargue la página al enviar el formulario
+
+        const email = formEvent.querySelector('#email').value.toLowerCase();
+        const password = formEvent.querySelector('#password').value;
+
+        // Vamos a crear la API para login en la carpeta de services (authServices)
+        try {
+            if (!email || !password) {
+                throw new Error("Email or password is required");
+            }
+
+            // Es obligatorio enviar los dos parámetros, de lo contrario son null
+            const response = await AuthServices.login(email, password);
+
+            if (!response.success) {
+                throw new Error (response.error || 'Error during login. Please try again.');
+            }
+
+            console.log(response);
+            window.location.hash = '#dashboard';
+        } catch (error) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = error.message || 'Error during login. Please try again later.';
+        }
+    });
+}
+
+
 
 

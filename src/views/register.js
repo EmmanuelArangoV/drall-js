@@ -1,31 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RestorApp - Register</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body id="app">
-<main class="container">
-    <div class="card register-card">
-        <div class="brand">
-            <div class="icon-circle">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M11 9H9V2H15V9H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M3 11V13H21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M8 13L6 22H18L16 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-            <h1 class="title">RestorApp</h1>
-            <p class="subtitle">Create your account</p>
-        </div>
+import AuthServices from "../services/authServices.js";
 
-        <form class="form form-register">
-            <div class="field">
+// Se importa en app.js
+export function RegisterView() {
+    const main = document.createElement('main');
+    main.classList.add('container');
+
+    const brand = document.createElement('div');
+    brand.classList.add('brand');
+    brand.innerHTML =
+        `<div class="icon-circle">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 9H9V2H15V9H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3 11V13H21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 13L6 22H18L16 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <h1 class="title">RestorApp</h1>
+        <p class="subtitle">Create your account</p>`;
+
+    const form = document.createElement('form');
+    form.classList.add('form', 'form-register');
+    form.innerHTML =
+            `<div class="field">
                 <label for="name" class="label">Full Name</label>
                 <div class="input-wrapper">
                     <svg class="input-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -79,22 +75,65 @@
                     <select id="role" class="input select">
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
-                        <option value="staff">Staff</option>
                     </select>
                 </div>
             </div>
+            
+            <p id="register-error" class="form-error" style="display:none;color:red;"></p>
 
             <button type="submit" class="button primary button-full">Sign Up</button>
 
             <p class="footer-text">
                 Already have an account? <a href="login.html" class="link">Sign in</a>
-            </p>
-        </form>
-    </div>
+            </p>`;
 
-    <footer class="page-footer">
-        RestorApp Academic Simulation
-    </footer>
-</main>
-</body>
-</html>
+    const registerCard = document.createElement('div')
+    registerCard.classList.add('card', 'register-card');
+    registerCard.appendChild(brand);
+    registerCard.appendChild(form);
+
+    main.appendChild(registerCard);
+
+    registerRequest(main);
+
+    return main;
+}
+
+function registerRequest(main) {
+    const form = main.querySelector('.form');
+    const errorMsg = main.querySelector('#register-error');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = form.querySelector('#name').value;
+        const email = form.querySelector('#email').value;
+        const password = form.querySelector('#password').value;
+        const confirmPassword = form.querySelector('#confirm-password').value;
+        const role = form.querySelector('#role').value;
+
+        try {
+            if (!name || !email || !password || !confirmPassword) {
+                throw new Error('All fields are required');
+            }
+
+            if (password !== confirmPassword) {
+                throw new Error("Passwords don't match")
+            }
+
+            const data = {name, email, password, role}
+
+            const response = await AuthServices.register(data);
+            console.log(response)
+
+            if (!response.success) {
+                throw new Error(response.error || 'Registration failed. Please try again.');
+            }
+            window.location.hash = '#login';
+
+        } catch (error) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = error.message || 'Error during registration. Please try again.';
+        }
+    })
+}
