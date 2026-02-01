@@ -59,7 +59,7 @@
   ],
   "products": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Classic Beef Burger",
       "category": "BURGERS",
       "price": 8.99,
@@ -68,16 +68,16 @@
       "alt": "Classic Beef Burger"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Double Bacon Melt",
       "category": "BURGERS",
-      "price": 12.50,
+      "price": 12.5,
       "description": "Two patties, crispy bacon, melted swiss cheese, and...",
       "image": "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400",
       "alt": "Double Bacon Melt"
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "Golden Fries",
       "category": "SIDES",
       "price": 3.99,
@@ -86,32 +86,75 @@
       "alt": "Golden Fries"
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "Cola Zero",
       "category": "DRINKS",
-      "price": 2.50,
+      "price": 2.5,
       "description": "Chilled zero sugar cola with ice and a slice of lemon.",
       "image": "https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=400",
       "alt": "Cola Zero"
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "Donut Box",
       "category": "DESSERTS",
-      "price": 6.00,
+      "price": 6,
       "description": "Assorted glazed and frosted donuts.",
       "image": "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400",
       "alt": "Donut Box"
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "Pepperoni Slice",
       "category": "PIZZA",
-      "price": 4.50,
+      "price": 4.5,
       "description": "Large NY style slice with double pepperoni.",
       "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400",
       "alt": "Pepperoni Slice"
     }
   ],
-  "orders": []
+  "orders": [
+    {
+      "id": "37e5",
+      "items": [
+        {
+          "productId": "1",
+          "name": "Classic Beef Burger",
+          "price": 8.99,
+          "quantity": 1
+        },
+        {
+          "productId": "2",
+          "name": "Double Bacon Melt",
+          "price": 12.5,
+          "quantity": 1
+        },
+        {
+          "productId": "3",
+          "name": "Golden Fries",
+          "price": 3.99,
+          "quantity": 3
+        }
+      ],
+      "subtotal": 33.46,
+      "tax": 2.68,
+      "total": 36.14,
+      "createdAt": "2026-02-01T20:47:03.608Z"
+    },
+    {
+      "id": "71f9",
+      "items": [
+        {
+          "productId": "2",
+          "name": "Double Bacon Melt",
+          "price": 12.5,
+          "quantity": 5
+        }
+      ],
+      "subtotal": 62.5,
+      "tax": 5,
+      "total": 67.5,
+      "createdAt": "2026-02-01T20:49:01.808Z"
+    }
+  ]
 }

@@ -1,3 +1,5 @@
+import store from "../state/store.js";
+
 export function CardComponent(product) {
 
     const card = document.createElement('article');
@@ -7,7 +9,7 @@ export function CardComponent(product) {
             <img src="${product.image}" alt="${product.alt}" class="product-image">
             <div class="product-info">
                 <h3 class="product-title">${product.name}</h3>
-                <p class="product-price">${product.price}</p>
+                <p class="product-price">$ ${product.price}</p>
                 <p class="product-description">${product.description}</p>
                 <button class="button secondary">
                     <svg class="button-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,5 +19,20 @@ export function CardComponent(product) {
                     </svg>
                     Add to order
                 </button>
-            </div>`
+            </div>`;
+
+    cardScript(card, product);
+
+    return card;
+}
+
+function cardScript(card, product) {
+    const addButton = card.querySelector('button');
+
+    addButton.addEventListener('click', () => {
+        store.addToCart(product);
+        const original = addButton.textContent;
+        addButton.textContent = "Added";
+        setTimeout(() => addButton.textContent = original, 500);
+    });
 }

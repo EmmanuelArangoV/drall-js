@@ -1,5 +1,6 @@
 import JsonService from "../services/jsonService.js";
 import { CardComponent } from "../components/Card.js";
+import { SideBardComponent } from "../components/Sidebar.js";
 
 export function MenuView() {
 
@@ -55,6 +56,12 @@ export function MenuView() {
     section.appendChild(searchWrapper);
     section.appendChild(filterGroup);
     section.appendChild(grid);
+    const sidebar = SideBardComponent();
+
+    main.appendChild(section);
+    main.appendChild(sidebar);
+
+    return main;
 }
 
 function productsRender(grid) {
