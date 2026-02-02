@@ -139,7 +139,8 @@
       "subtotal": 33.46,
       "tax": 2.68,
       "total": 36.14,
-      "createdAt": "2026-02-01T20:47:03.608Z"
+      "createdAt": "2026-02-01T20:47:03.608Z",
+      "status": "pending"
     },
     {
       "id": "71f9",
@@ -154,7 +155,61 @@
       "subtotal": 62.5,
       "tax": 5,
       "total": 67.5,
-      "createdAt": "2026-02-01T20:49:01.808Z"
+      "createdAt": "2026-02-01T20:49:01.808Z",
+      "status": "ready"
+    },
+    {
+      "id": "1995",
+      "items": [
+        {
+          "productId": "4",
+          "name": "Cola Zero",
+          "price": 2.5,
+          "quantity": 1
+        },
+        {
+          "productId": "5",
+          "name": "Donut Box",
+          "price": 6,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 8.5,
+      "tax": 0.68,
+      "total": 9.18,
+      "createdAt": "2026-02-01T23:49:58.021Z",
+      "status": "ready"
+    },
+    {
+      "id": "7092",
+      "items": [
+        {
+          "productId": "1",
+          "name": "Classic Beef Burger",
+          "price": 8.99,
+          "quantity": 1
+        },
+        {
+          "productId": "2",
+          "name": "Double Bacon Melt",
+          "price": 12.5,
+          "quantity": 1
+        },
+        {
+          "productId": "3",
+          "name": "Golden Fries",
+          "price": 3.99,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 25.48,
+      "tax": 2.04,
+      "total": 27.52,
+      "createdAt": "2026-02-02T01:14:29.761Z",
+      "status": "preparing",
+      "customerName": "Pedro Sánchez",
+      "customerEmail": "pedro.s@outlook.com",
+      "user": "5"
     }
   ]
 }

@@ -1,72 +1,38 @@
-const API_BASE = "http://localhost:3000";
+import JsonService from './jsonService.js';
 
 class AuthServices {
     async register(user) {
         try {
-            const response = await fetch(`${API_BASE}/users?email=${user.email}`);
-
-            if(!response.ok) {
-                throw new Error('Error verifying user credentials');
+            // Verificar existencia por email
+            const existing = await JsonService.getUserByEmail(user.email);
+            if (!existing.success) {
+                throw new Error(existing.error || 'Error verifying user');
             }
 
-            const exitingUser = await response.json();
-
-            if (Array.isArray(exitingUser) && exitingUser.length > 0) {
+            if (Array.isArray(existing.users) && existing.users.length > 0) {
                 throw new Error('Email is already registered');
             }
 
-            // POST: Mandar / Guardar
-            // PUT: Actualizar
-            // PATCH: Actualizar parcialmente
-            // DELETE: Borrar --> Evitar usar
+            const created = await JsonService.createUser(user);
+            if (!created.success) throw new Error(created.error || 'Error registering user');
 
-            // JSON -> "user": "luis"
-            //OBJETO -> user: "luis"
-
-            // js -> bd = JSON.stringify(user)
-            // bd -> js = user.json()
-
-            const registerResponse = await fetch(`${API_BASE}/users`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(user)
-            });
-
-            if(!registerResponse.ok) {
-                throw new Error('Error registering user');
-            }
-
-            const newUser = registerResponse.json();
-
-            return { success:true, newUser};
-        }catch(error) {
-            return { success:false, error: error.message};
+            return { success: true, user: created.user };
+        } catch (error) {
+            return { success: false, error: error.message };
         }
     }
 
     async login(email, password) {
         try {
-            const response = await fetch(`${API_BASE}/users?email=${email}&password=${password}`);
+            const res = await JsonService.getUserByCredentials(email, password);
+            if (!res.success) throw new Error(res.error || 'Error verifying credentials');
 
-            //Por seguridad
-            if(!response.ok) {
-                throw new Error('Error verifying user credentials');
-            }
-
-            // Obtenemos los usuarios
-            const data = await response.json();
-
-            // Validamos si usuario existe o no
-            if (!Array.isArray(data) ||data.length === 0) {
+            const data = res.users;
+            if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid credentials');
             }
 
-            // Obtenemos usuario
             const user = data[0];
-
-            // Retornamos exitoso y el usuario
             return { success: true, user };
         } catch (error) {
             return { success: false, error: error.message };

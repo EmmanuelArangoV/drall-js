@@ -161,7 +161,7 @@ input, select, textarea {
 .header {
     background: var(--color-card);
     border-bottom: 1px solid var(--color-border);
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 0.5rem var(--spacing-lg);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -174,6 +174,8 @@ input, select, textarea {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
 }
 
 .logo {
@@ -1342,4 +1344,33 @@ input, select, textarea {
     .card.register-card {
         max-width: 440px;
     }
+}
+
+.button-icon,
+.button-icon-right,
+.filter-icon,
+.search-icon,
+.logo-icon {
+    stroke: currentColor;
+    fill: none;
+    color: inherit;
+}
+
+/* ensure svg inside .button inherit color and use stroke only */
+.button svg, .button-icon, .button-icon * {
+    color: inherit;
+    stroke: currentColor !important;
+    fill: none !important;
+}
+
+/* Force icons inside secondary buttons to use currentColor stroke and no fill to ensure visibility */
+.button.secondary svg, .button.secondary .button-icon {
+    stroke: currentColor !important;
+    fill: none !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* If the button has an icon only, make sure it contrasts */
+.button.secondary {
+    color: var(--color-text-primary);
 }

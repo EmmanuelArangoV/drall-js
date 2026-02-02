@@ -2,72 +2,89 @@ import JsonService from "../services/jsonService.js";
 
 const STORAGE_KEY = 'restautant_session';
 
-// GET -> Traer datos del localStorage
-// SET -> Guardar datos en el localStorage
-
+// Estado interno
 const state = {
-    cart: []
+    cart: [],
+    user: null
 }
 
-const subscribers = [];
+// Subscriptores separados para carrito y usuario
+const cartSubscribers = [];
+const userSubscribers = [];
 
-// Funcion inicial para traer datos del localStorage
-// localStorage -> js se usa JSON.parse()
-//js -> localStorage se usa JSON.stringify
-
+// Carga el estado completo (cart + user) desde localStorage
 function loadFromStorage() {
     try {
         const data = localStorage.getItem(STORAGE_KEY);
-        if (!data) {
-            throw new Error('Error fetching storage data.');
-        }
-        const data_ready = JSON.parse(data);
-        const cart = data_ready.cart
-
-        return cart || []; // OR
-
+        if (!data) return { cart: [], user: null };
+        const parsed = JSON.parse(data);
+        return {
+            cart: Array.isArray(parsed.cart) ? parsed.cart : [],
+            user: parsed.user || null
+        };
     } catch (error) {
         console.error('Error loading state from storage:', error.message);
-        return [];
+        return { cart: [], user: null };
     }
 }
 
-// Guardar en el local Storage cualquier nuevo producto
+// Guarda el estado completo en localStorage
 function saveToStorage() {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ cart: state.cart }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ cart: state.cart, user: state.user }));
     } catch (error) {
-        console.log('Error saving storage', error);
+        console.error('Error saving storage', error);
     }
 }
 
-// Obtengo una copia del carrito
+// Devuelve copia del carrito (inmutable desde fuera)
 function getCart() {
     return {
-        // Pasar el carrito totalmente igual
-        cart: state.cart.map(i => ({ ...i}))
-    }
+        cart: state.cart.map(i => ({ ...i }))
+    };
 }
 
-// Notifica acerca de cualquier cambio
-function notify() {
-    saveToStorage();
-    const copy_cart = getCart();
+// Devuelve usuario
+function getUser() {
+    return state.user ? { ...state.user } : null;
+}
 
-    subscribers.forEach(sub => {
+function getRole() {
+    return state.user && state.user.role ? state.user.role : null;
+}
+
+// Notifica cambios en carrito
+function notifyCart() {
+    saveToStorage();
+    const copy = getCart();
+    cartSubscribers.forEach(sub => {
         try {
-            sub(copy_cart); // -> Acá llamo a un suscriptor en este caso es la funcion render de sidebar
+            sub(copy);
         } catch (err) {
-            console.error('Error al subscribir', error.message)
+            console.error('Error in cart subscriber', err.message || err);
         }
     });
 }
 
+// Notifica cambios en usuario
+function notifyUser() {
+    saveToStorage();
+    const copy = getUser();
+    userSubscribers.forEach(sub => {
+        try {
+            sub(copy);
+        } catch (err) {
+            console.error('Error in user subscriber', err.message || err);
+        }
+    });
+}
 
+// Inicializar estado desde storage
+const initial = loadFromStorage();
+state.cart = initial.cart || [];
+state.user = initial.user || null;
 
-// Inicializar el carrito
-state.cart = loadFromStorage();
-
+// --- Carrito (se respeta la lógica original) ---
 function addToCart(product) {
     const existing = state.cart.find(i => i.id === product.id);
 
@@ -84,7 +101,7 @@ function addToCart(product) {
             quantity: 1
         });
     }
-    notify();
+    notifyCart();
 }
 
 function updateQuantity(productId, quantity) {
@@ -93,36 +110,54 @@ function updateQuantity(productId, quantity) {
     if (index === -1) return;
 
     if (quantity <= 0) {
-        state.cart.splice(index, 1); // Borra solo el elemento en el que está parado
+        state.cart.splice(index, 1);
     } else {
-        state.cart[index].quantity = quantity
+        state.cart[index].quantity = quantity;
     }
-    notify();
+    notifyCart();
 }
 
 function removeProduct(productId) {
     const index = state.cart.findIndex(i => i.id === productId);
-    state.cart.splice(index, 1); // Borra solo el elemento en el que está parado
-    notify();
+    if (index === -1) return;
+    state.cart.splice(index, 1);
+    notifyCart();
 }
 
 function clearCart() {
     state.cart = [];
-    notify();
+    notifyCart();
 }
 
-// Primer subscripcion y envía un video
+// Suscripción al carrito (mantengo compatibilidad)
 function subscribe(subscriber) {
     if (typeof subscriber !== 'function') throw new Error('It needs to be a function');
-    subscribers.push(subscriber);
-
+    cartSubscribers.push(subscriber);
     try {
-        subscriber(getCart()); // Acá llamo a un suscriptor en este caso es la funcion render de sidebar
+        subscriber(getCart());
     } catch (e) {
-        console.error('Subscriber initial call error', e.message);
+        console.error('Subscriber initial call error', e.message || e);
     }
 }
 
+// --- Usuario: getter/setter y subscripciones ---
+function setUser(user) {
+    // user puede ser null (logout) o un objeto con al menos {id, email, role}
+    state.user = user ? { ...user } : null;
+    notifyUser();
+}
+
+function subscribeUser(subscriber) {
+    if (typeof subscriber !== 'function') throw new Error('It needs to be a function');
+    userSubscribers.push(subscriber);
+    try {
+        subscriber(getUser());
+    } catch (e) {
+        console.error('User subscriber initial call error', e.message || e);
+    }
+}
+
+// --- Make Order (se mantiene) ---
 async function makeOrder() {
     const items = state.cart.map(i => ({
         productId: i.id,
@@ -143,30 +178,48 @@ async function makeOrder() {
         subtotal,
         tax,
         total,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        status: 'preparing'
     };
+
+    // Si hay usuario autenticado, agregamos metadata
+    const user = state.user;
+    if (user) {
+        order.customerName = user.name || user.email;
+        order.customerEmail = user.email;
+        order.user = user.id || user.email;
+    }
 
     try {
         const response = await JsonService.postOrder(order);
         if (response && response.success) {
             clearCart();
-            return { success: true, data: response.data }
+            return { success: true, data: response.data };
         } else {
-            return { success: false, error: response.error}
+            return { success: false, error: response.error };
         }
     } catch (e) {
-        console.error('Error', e.message);
-        return { success: false, error: e.message}
+        console.error('Error', e.message || e);
+        return { success: false, error: e.message };
     }
 }
 
 const store = {
+    // cart
     addToCart,
     updateQuantity,
     removeProduct,
     clearCart,
-    subscribe,
-    makeOrder
-}
+    subscribe, // cart subscriber
+    // user
+    getUser,
+    setUser,
+    getRole,
+    subscribeUser,
+    // orders
+    makeOrder,
+    // helper
+    getCart
+};
 
 export default store;

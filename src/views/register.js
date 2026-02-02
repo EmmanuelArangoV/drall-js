@@ -1,4 +1,5 @@
 import AuthServices from "../services/authServices.js";
+import store from "../state/store.js";
 
 // Se importa en app.js
 export function RegisterView() {
@@ -84,7 +85,7 @@ export function RegisterView() {
             <button type="submit" class="button primary button-full">Sign Up</button>
 
             <p class="footer-text">
-                Already have an account? <a href="login.html" class="link">Sign in</a>
+                Already have an account? <a href="#/login" class="link">Sign in</a>
             </p>`;
 
     const registerCard = document.createElement('div')
@@ -129,7 +130,7 @@ function registerRequest(main) {
             if (!response.success) {
                 throw new Error(response.error || 'Registration failed. Please try again.');
             }
-            window.location.hash = '#login';
+            window.location.hash = '#/login';
 
         } catch (error) {
             errorMsg.style.display = 'block';

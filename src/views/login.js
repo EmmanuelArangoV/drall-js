@@ -1,4 +1,5 @@
 import AuthServices from "../services/authServices.js";
+import store from "../state/store.js";
 
 export function LoginView() {
     const main = document.createElement('main');
@@ -49,7 +50,7 @@ export function LoginView() {
             <button type="submit" class="button primary">Sign In</button>
 
             <p class="footer-text">
-                Don't have an account? <a href="register.html" class="link">Sign up</a>
+                Don't have an account? <a href="#/register" class="link">Sign up</a>
             </p>`;
 
     // Footer
@@ -81,28 +82,30 @@ function loginRequest(main) {
         const email = formEvent.querySelector('#email').value.toLowerCase();
         const password = formEvent.querySelector('#password').value;
 
-        // Vamos a crear la API para login en la carpeta de services (authServices)
         try {
             if (!email || !password) {
                 throw new Error("Email or password is required");
             }
 
-            // Es obligatorio enviar los dos parámetros, de lo contrario son null
             const response = await AuthServices.login(email, password);
 
             if (!response.success) {
                 throw new Error (response.error || 'Error during login. Please try again.');
             }
 
-            console.log(response);
-            window.location.hash = '#dashboard';
+            // Guardar el usuario en el store (y localStorage desde ahí)
+            store.setUser(response.user);
+
+            // Redirigir según rol
+            const role = store.getRole();
+            if (role === 'admin') {
+                window.location.hash = '#/admin';
+            } else {
+                window.location.hash = '#/menu';
+            }
         } catch (error) {
             errorMsg.style.display = 'block';
             errorMsg.textContent = error.message || 'Error during login. Please try again later.';
         }
     });
 }
-
-
-
-

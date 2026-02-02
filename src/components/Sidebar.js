@@ -5,11 +5,29 @@ export function SideBardComponent() {
     // Contenedores principales
     const header = document.createElement('div');
     header.classList.add('sidebar-header');
-    header.innerHTML =
-        `
-        <h2 class="sidebar-title">Your Order</h2>
-        <span class="order-count">0</span>
-        <button class="link-button clear-all">Clear all</button>`;
+
+    const titleEl = document.createElement('h2');
+    titleEl.classList.add('sidebar-title');
+    titleEl.textContent = 'Your Order';
+
+    const orderCount = document.createElement('span');
+    orderCount.classList.add('order-count');
+    orderCount.textContent = '0';
+
+    const clearBtn = document.createElement('button');
+    clearBtn.classList.add('link-button', 'clear-all');
+    // Añadir icono a Clear all
+    const clearIcon = document.createElement('svg');
+    clearIcon.setAttribute('viewBox','0 0 24 24');
+    clearIcon.classList.add('button-icon');
+    clearIcon.innerHTML = '<path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6L18.3333 19.3333C18.292 20.0794 17.6815 20.6667 16.9343 20.6667H7.06566C6.31847 20.6667 5.70799 20.0794 5.66667 19.3333L5 6M10 11V17M14 11V17M9 6V4C9 3.46957 9.21071 2.96086 9.58579 2.58579C9.96086 2.21071 10.4696 2 11 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    clearBtn.appendChild(clearIcon);
+    const clearText = document.createTextNode('Clear all');
+    clearBtn.appendChild(clearText);
+
+    header.appendChild(titleEl);
+    header.appendChild(orderCount);
+    header.appendChild(clearBtn);
 
     const orderItems = document.createElement('div');
     orderItems.classList.add('order-items');
@@ -19,12 +37,14 @@ export function SideBardComponent() {
 
     const checkoutButton = document.createElement('button');
     checkoutButton.classList.add('button', 'primary');
-    checkoutButton.innerHTML =
-        `
-        Confirm Order
-        <svg class="button-icon-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>`;
+    // Compose button content without innerHTML
+    const checkoutText = document.createTextNode('Confirm Order');
+    const checkoutIcon = document.createElement('svg');
+    checkoutIcon.classList.add('button-icon-right');
+    checkoutIcon.setAttribute('viewBox','0 0 24 24');
+    checkoutIcon.innerHTML = '<path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    checkoutButton.appendChild(checkoutText);
+    checkoutButton.appendChild(checkoutIcon);
 
     const sidebar = document.createElement('aside');
     sidebar.classList.add('sidebar');
@@ -34,12 +54,9 @@ export function SideBardComponent() {
     sidebar.appendChild(checkoutButton);
 
     // Handlers que se registran UNA sola vez
-    const clearBtn = header.querySelector('.clear-all');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            store.clearCart();
-        });
-    }
+    clearBtn.addEventListener('click', () => {
+        store.clearCart();
+    });
 
     checkoutButton.addEventListener('click', async () => {
         if (checkoutButton.disabled) return;
@@ -75,6 +92,74 @@ function calculateTotals(cart) {
     return {subtotal, tax, total};
 }
 
+// Crea un item de orden usando appendChild
+function createOrderItem(item) {
+    const itemElement = document.createElement('div');
+    itemElement.classList.add('order-item');
+    itemElement.dataset.id = item.id;
+
+    const img = document.createElement('img');
+    img.src = item.image;
+    img.alt = item.alt || item.name;
+    img.classList.add('item-image');
+
+    const details = document.createElement('div');
+    details.classList.add('item-details');
+
+    const name = document.createElement('h4');
+    name.classList.add('item-name');
+    name.textContent = item.name;
+
+    const price = document.createElement('p');
+    price.classList.add('item-price');
+    price.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+
+    const qtyControl = document.createElement('div');
+    qtyControl.classList.add('quantity-control');
+
+    const dec = document.createElement('button'); dec.classList.add('quantity-button','decrease'); dec.textContent = '−';
+    const qty = document.createElement('span'); qty.classList.add('quantity'); qty.textContent = item.quantity;
+    const inc = document.createElement('button'); inc.classList.add('quantity-button','increase'); inc.textContent = '+';
+    const removeBtn = document.createElement('button'); removeBtn.classList.add('remove-button');
+    // Añadir icono y texto al botón de remover (icono primero)
+    const removeIcon = document.createElement('svg');
+    removeIcon.setAttribute('viewBox','0 0 24 24');
+    removeIcon.classList.add('button-icon');
+    removeIcon.innerHTML = '<path d="M6 18L18 6M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    const removeText = document.createTextNode('Remove');
+    removeBtn.appendChild(removeIcon);
+    removeBtn.appendChild(removeText);
+
+    qtyControl.appendChild(dec);
+    qtyControl.appendChild(qty);
+    qtyControl.appendChild(inc);
+    qtyControl.appendChild(removeBtn);
+
+    details.appendChild(name);
+    details.appendChild(price);
+    details.appendChild(qtyControl);
+
+    itemElement.appendChild(img);
+    itemElement.appendChild(details);
+
+    // Attach handlers for this item
+    dec.addEventListener('click', () => {
+        const newQuantity = item.quantity - 1;
+        store.updateQuantity(item.id, newQuantity);
+    });
+
+    inc.addEventListener('click', () => {
+        const newQuantity = item.quantity + 1;
+        store.updateQuantity(item.id, newQuantity);
+    });
+
+    removeBtn.addEventListener('click', () => {
+        store.removeProduct(item.id);
+    });
+
+    return itemElement;
+}
+
 // Recibe todos los avisos del canal
 function render(sidebar, cartObject) {
     const cart = cartObject.cart || [];
@@ -82,70 +167,46 @@ function render(sidebar, cartObject) {
     // Actualizamos contador de productos
     const count = cart.reduce((s,i) => s + i.quantity, 0);
     const countElement = sidebar.querySelector('.order-count');
-    countElement.textContent = count || null;
+    countElement.textContent = count || '0';
 
     // Order Items section
     const orderItems = sidebar.querySelector('.order-items');
-    orderItems.innerHTML = '';
+    // Limpiar contenido previo
+    while (orderItems.firstChild) orderItems.removeChild(orderItems.firstChild);
 
     if (cart.length === 0) {
-        orderItems.innerHTML = '<p>Your order is empty</p>'
+        const p = document.createElement('p');
+        p.textContent = 'Your order is empty';
+        orderItems.appendChild(p);
     } else {
         cart.forEach(item => {
-            const itemElement = document.createElement('div');
-            itemElement.classList.add("order-item");
-            itemElement.dataset.id = item.id;
-
-            const priceProduct = item.price * item.quantity
-            itemElement.innerHTML =
-                `<img src="${item.image}" alt=${item.alt} class="item-image">
-                    <div class="item-details">
-                        <h4 class="item-name">${item.name}</h4>
-                        <p class="item-price">$${priceProduct}</p>
-                        <div class="quantity-control">
-                            <button class="quantity-button decrease">−</button>
-                            <span class="quantity">${item.quantity}</span>
-                            <button class="quantity-button increase">+</button>
-                            <button class="remove-button">Remove</button>
-                        </div>
-                    </div>`;
-
-            const decrease = itemElement.querySelector('.decrease');
-            const increase = itemElement.querySelector('.increase');
-            const removeBtn = itemElement.querySelector('.remove-button');
-
-            decrease.addEventListener('click', () => {
-                const newQuantity = item.quantity - 1;
-                store.updateQuantity(item.id, newQuantity);
-            });
-
-            increase.addEventListener('click', () => {
-                const newQuantity = item.quantity + 1;
-                store.updateQuantity(item.id, newQuantity);
-            });
-
-            removeBtn.addEventListener('click', () => {
-                store.removeProduct(item.id);
-            });
-
-            orderItems.appendChild(itemElement);
+            const itemEl = createOrderItem(item);
+            orderItems.appendChild(itemEl);
         });
     }
 
     const totals = calculateTotals(cart);
 
     const orderSummary = sidebar.querySelector('.order-summary');
-    orderSummary.innerHTML = `
-                <div class="summary-row">
-                    <span class="summary-label">Subtotal</span>
-                    <span class="summary-value">$ ${totals.subtotal.toFixed(2)}</span>
-                </div>
-                <div class="summary-row">
-                    <span class="summary-label">Tax (8%)</span>
-                    <span class="summary-value">$ ${totals.tax.toFixed(2)}</span>
-                </div>
-                <div class="summary-row total">
-                    <span class="summary-label">Total</span>
-                    <span class="summary-value">$ ${totals.total.toFixed(2)}</span>
-                </div>`;
+    // Limpiar y construir summary
+    while (orderSummary.firstChild) orderSummary.removeChild(orderSummary.firstChild);
+
+    const row1 = document.createElement('div'); row1.classList.add('summary-row');
+    const label1 = document.createElement('span'); label1.classList.add('summary-label'); label1.textContent = 'Subtotal';
+    const value1 = document.createElement('span'); value1.classList.add('summary-value'); value1.textContent = `$ ${totals.subtotal.toFixed(2)}`;
+    row1.appendChild(label1); row1.appendChild(value1);
+
+    const row2 = document.createElement('div'); row2.classList.add('summary-row');
+    const label2 = document.createElement('span'); label2.classList.add('summary-label'); label2.textContent = 'Tax (8%)';
+    const value2 = document.createElement('span'); value2.classList.add('summary-value'); value2.textContent = `$ ${totals.tax.toFixed(2)}`;
+    row2.appendChild(label2); row2.appendChild(value2);
+
+    const row3 = document.createElement('div'); row3.classList.add('summary-row','total');
+    const label3 = document.createElement('span'); label3.classList.add('summary-label'); label3.textContent = 'Total';
+    const value3 = document.createElement('span'); value3.classList.add('summary-value'); value3.textContent = `$ ${totals.total.toFixed(2)}`;
+    row3.appendChild(label3); row3.appendChild(value3);
+
+    orderSummary.appendChild(row1);
+    orderSummary.appendChild(row2);
+    orderSummary.appendChild(row3);
 }
